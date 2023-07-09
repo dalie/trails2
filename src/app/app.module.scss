@@ -1,0 +1,24 @@
+.container {
+  display: grid;
+  grid-template-columns: min-content auto min-content;
+  grid-template-rows: 1fr;
+  z-index: 1;
+  height: 100%;
+  .map {
+    grid-column: 1 / 3;
+    grid-row: 1 / 3;
+    z-index: 1;
+  }
+
+  .map-controls-left {
+    grid-column: 1 / 1;
+    grid-row: 1/3;
+    z-index: 2;
+  }
+
+  .map-controls-right {
+    grid-column: 3 / 3;
+    grid-row: 1/3;
+    z-index: 2;
+  }
+}
