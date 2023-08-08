@@ -1,43 +1,26 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { useEffect } from "react";
-import { useRecoilState } from "recoil";
+import { useCallback, useState } from "react";
 import styles from "./app.module.scss";
 import { MapControls } from "./components/map-controls/map-controls";
-import { Map } from "./components/map/map";
-import { locationState } from "./store/location.atom";
+import { BaseLayer, Map } from "./components/map/map";
 
 export function App() {
-  const [location, setLocation] = useRecoilState(locationState);
+  const [baseLayer, setBaseLayer] = useState<BaseLayer>("quebec");
 
-  useEffect(() => {
-    navigator.geolocation.getCurrentPosition((position) => {
-      console.log(position);
-    });
-
-    const locationRef = navigator.geolocation.watchPosition((position) => {
-      setLocation({
-        longitude: position.coords.longitude,
-        latitude: position.coords.latitude,
-        accuracy: position.coords.accuracy,
-        altitude: position.coords.altitude,
-        altitudeAccuracy: position.coords.altitudeAccuracy,
-        heading: position.coords.heading,
-        speed: position.coords.speed,
-      });
-    });
-
-    return () => {
-      navigator.geolocation.clearWatch(locationRef);
-    };
+  const baseLayerChanged = useCallback((value: BaseLayer) => {
+    setBaseLayer(value);
   }, []);
 
   return (
     <div className={styles["container"]}>
       <div className={styles["map"]}>
-        <Map />
+        <Map baseLayer={baseLayer} />
       </div>
       <div className={styles["map-controls-right"]}>
-        <MapControls />
+        <MapControls
+          baseLayer={baseLayer}
+          baseLayerChanged={baseLayerChanged}
+        />
       </div>
     </div>
   );
