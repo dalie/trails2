@@ -33,7 +33,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: 14  # You can specify your preferred Node.js version here
+          node-version: 16  # You can specify your preferred Node.js version here
       - name: Install dependencies
         run: npm install
       - name: Build with Nx
@@ -41,7 +41,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2
         with:
-          name: build-artifact
+          name: github-pages
           path: dist/app
 
   # Deployment job
@@ -56,5 +56,6 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v2
         with:
+          name: build-artifact
           token: ${{ secrets.GITHUB_TOKEN }}
           source: ./dist/app
