@@ -4,7 +4,7 @@
   "license": "MIT",
   "scripts": {
     "start": "nx serve",
-    "build": "nx build",
+    "build": "nx build -- --prod --baseHref=/trails2/",
     "test": "nx test",
     "predeploy": "npm run build -- --prod --baseHref=/trails2/",
     "deploy": "gh-pages -d dist/app"
