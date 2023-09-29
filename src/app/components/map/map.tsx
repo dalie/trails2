@@ -2,6 +2,7 @@ import { FeatureCollection } from "geojson";
 import { useEffect, useState } from "react";
 import ReactMap, { Layer, Source } from "react-map-gl";
 import styles from "./map.module.scss";
+import { environment } from "src/environment/environment";
 
 const geojsonSources = [
   "geojson/20230620-130226.geojson",
@@ -24,14 +25,14 @@ export function Map({ baseLayer }: MapProps) {
   );
 
   useEffect(() => {
-    fetch("geojson/result.geojson")
+    fetch(environment.deployedPath + "geojson/result.geojson")
       .then((response) => response.json())
       .then((data) => {
         setGeojsonFqmhr(data);
       });
 
     for (const source of geojsonSources) {
-      fetch(source)
+      fetch(environment.deployedPath + source)
         .then((response) => response.json())
         .then((data) => {
           setGeojsonData((oldValue) => {
