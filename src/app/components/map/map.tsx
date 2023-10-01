@@ -1,14 +1,7 @@
-import { FeatureCollection } from "geojson";
 import { useEffect, useState } from "react";
 import ReactMap, { Layer, Source } from "react-map-gl";
 import styles from "./map.module.scss";
-import { environment } from "src/environment/environment";
-
-const geojsonSources = [
-  "geojson/20230620-130226.geojson",
-  "geojson/altonvale-pit.geojson",
-  "geojson/oftr-trails.geojson",
-];
+import { Expression } from "mapbox-gl";
 
 export type BaseLayer = "quebec" | "ontario" | "satellite" | "streets";
 
@@ -17,29 +10,56 @@ export interface MapProps {
   baseLayer: BaseLayer;
 }
 
+function getLineColor(layerId: string): string | Expression {
+  if (layerId.startsWith("oftr")) {
+    return [
+      "match",
+      ["get", "osmand_category"],
+      "Single Track",
+      "#ff5533",
+      "#92FA6E",
+    ];
+  } else if (layerId.startsWith("result")) {
+    return ["match", ["get", "STATUT"], "Chemin public", "#CBCBCB", "#92FA6E"];
+  } else {
+    return "#9933aa";
+  }
+}
 export function Map({ baseLayer }: MapProps) {
-  const [geojsonData, setGeojsonData] = useState<FeatureCollection[]>([]);
-
-  const [geojsonFqmhr, setGeojsonFqmhr] = useState<FeatureCollection | null>(
-    null
-  );
+  const [tileSetsMetadata, setTileSetsMetadata] = useState<
+    { id: string; name: string; vector_layers: { id: string }[] }[]
+  >([]);
 
   useEffect(() => {
-    fetch(environment.deployedPath + "geojson/result.geojson")
+    fetch(
+      "https://api.mapbox.com/tilesets/v1/dominicalie?access_token=sk.eyJ1IjoiZG9taW5pY2FsaWUiLCJhIjoiY2xuNnJwbzhjMDY0NjJvbzRsdHBjc2xzNyJ9.Tg8duGAp2W_aN2d9y4Dj1A"
+    )
       .then((response) => response.json())
-      .then((data) => {
-        setGeojsonFqmhr(data);
-      });
+      .then((data: { id: string; name: string }[]) => {
+        const tilesets = data
+          .filter(
+            (l) =>
+              l.name.startsWith("trail_") ||
+              l.name.startsWith("result") ||
+              l.name.startsWith("oftr")
+          )
+          .map((layer: any) => layer.id);
 
-    for (const source of geojsonSources) {
-      fetch(environment.deployedPath + source)
-        .then((response) => response.json())
-        .then((data) => {
-          setGeojsonData((oldValue) => {
-            return [...oldValue, data];
-          });
+        tilesets.forEach((tileset) => {
+          // fetch TileJSON metadata for each tileset
+          fetch(
+            `https://api.mapbox.com/v4/${tileset}.json?access_token=pk.eyJ1IjoiZG9taW5pY2FsaWUiLCJhIjoiY2tuZzJ0YWtvMDcwejJxczlwa2NtbW0zeSJ9.ire3NMM19l7z4Zeqa20RVw`
+          )
+            .then((response) => response.json())
+            .then((data) => {
+              console.log(data);
+
+              setTileSetsMetadata((oldValue) => {
+                return [...oldValue, data];
+              });
+            });
         });
-    }
+      });
   }, []);
 
   return (
@@ -68,7 +88,6 @@ export function Map({ baseLayer }: MapProps) {
         >
           {baseLayer === "ontario" && (
             <Layer
-              beforeId="fqmhr"
               id="ontario-sat"
               type="raster"
               source="ontario-sat-source"
@@ -88,7 +107,6 @@ export function Map({ baseLayer }: MapProps) {
         >
           {baseLayer === "quebec" && (
             <Layer
-              beforeId="fqmhr"
               id="quebec-sat"
               type="raster"
               source="quebec-sat-source"
@@ -98,77 +116,46 @@ export function Map({ baseLayer }: MapProps) {
             />
           )}
         </Source>
-        {geojsonFqmhr && (
-          <Source id="fqmhr-source" type="geojson" data={geojsonFqmhr}>
-            <Layer
-              id="fqmhr"
-              type="line"
-              paint={{
-                "line-opacity": [
-                  "interpolate",
-                  ["linear"],
-                  ["zoom"],
-                  /* Zoom levels and corresponding opacity values */
-                  18,
-                  1, // Lower zoom level and full opacity
-                  20,
-                  0, // Higher zoom level and lower opacity
-                ],
-                "line-width": [
-                  "interpolate",
-                  ["linear"],
-                  ["zoom"],
 
-                  10,
-                  5,
-                  22,
-                  1,
-                ],
-                "line-color": [
-                  "match",
-                  ["get", "STATUT"],
-                  "Chemin public",
-                  "#CBCBCB",
-                  "#92FA6E",
-                ],
-              }}
-            />
-          </Source>
-        )}
-        {geojsonData.map((data, index) => (
+        {tileSetsMetadata.map((tileSet, index) => (
           <Source
             key={index}
-            id={`geojson-source-${index}`}
-            type="geojson"
-            data={data}
+            id={`tileset-source-${index}`}
+            type="vector"
+            url={`mapbox://${tileSet.id}`}
           >
-            <Layer
-              id={`geojson-layer-${index}`}
-              type="line"
-              paint={{
-                "line-color": "#3366ff",
-                "line-opacity": [
-                  "interpolate",
-                  ["linear"],
-                  ["zoom"],
-                  /* Zoom levels and corresponding opacity values */
-                  10,
-                  1, // Lower zoom level and full opacity
-                  20,
-                  0, // Higher zoom level and lower opacity
-                ],
-                "line-width": [
-                  "interpolate",
-                  ["linear"],
-                  ["zoom"],
+            {tileSet.vector_layers.map((layer) => (
+              <Layer
+                id={`tileset-layer-${index}`}
+                type="line"
+                source={`tileset-source-${index}`}
+                source-layer={layer.id}
+                paint={{
+                  //Purple line color
+                  "line-color": getLineColor(tileSet.name),
+                  "line-opacity": [
+                    "interpolate",
+                    ["linear"],
+                    ["zoom"],
+                    /* Zoom levels and corresponding opacity values */
+                    10,
+                    1, // Lower zoom level and full opacity
+                    20,
+                    0, // Higher zoom level and lower opacity
+                  ],
+                  "line-width": [
+                    "interpolate",
+                    ["linear"],
+                    ["zoom"],
 
-                  10,
-                  5,
-                  22,
-                  1,
-                ],
-              }}
-            />
+                    10,
+                    5,
+                    22,
+                    1,
+                  ],
+                }}
+              />
+            ))}
           </Source>
         ))}
       </ReactMap>
