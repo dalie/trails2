@@ -10,7 +10,7 @@ const geojsonSources = [
   "geojson/oftr-trails.geojson",
 ];
 
-export type BaseLayer = "quebec" | "ontario";
+export type BaseLayer = "quebec" | "ontario" | "satellite" | "streets";
 
 /* eslint-disable-next-line */
 export interface MapProps {
@@ -52,7 +52,11 @@ export function Map({ baseLayer }: MapProps) {
           zoom: 8,
         }}
         style={{ width: "100%", height: "100%" }}
-        mapStyle="mapbox://styles/dominicalie/cljkg5jdf00e401qph1m71f1n"
+        mapStyle={
+          baseLayer === "streets"
+            ? "mapbox://styles/mapbox/navigation-day-v1"
+            : "mapbox://styles/mapbox/satellite-streets-v12"
+        }
       >
         <Source
           id="ontario-sat-source"

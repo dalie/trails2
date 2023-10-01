@@ -1,17 +1,12 @@
 import {
-  Button,
-  ButtonGroup,
   FormControl,
   FormControlLabel,
   FormLabel,
   Radio,
   RadioGroup,
-  ToggleButton,
-  ToggleButtonGroup,
 } from "@mui/material";
 import styles from "./map-controls.module.scss";
-import LocationSearchingIcon from "@mui/icons-material/LocationSearching";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { BaseLayer } from "../map/map";
 
 /* eslint-disable-next-line */
@@ -27,13 +22,25 @@ export function MapControls({ baseLayer, baseLayerChanged }: MapControlsProps) {
   return (
     <div className={styles["container"]}>
       <FormControl>
-        <FormLabel id="demo-controlled-radio-buttons-group">Gender</FormLabel>
+        <FormLabel id="demo-controlled-radio-buttons-group">
+          Base Layer
+        </FormLabel>
         <RadioGroup
           aria-labelledby="demo-controlled-radio-buttons-group"
           name="controlled-radio-buttons-group"
           value={baseLayer}
           onChange={onBaseLayerChanged}
         >
+          <FormControlLabel
+            value="streets"
+            control={<Radio />}
+            label="Streets"
+          />
+          <FormControlLabel
+            value="satellite"
+            control={<Radio />}
+            label="Satellite"
+          />
           <FormControlLabel value="quebec" control={<Radio />} label="Quebec" />
           <FormControlLabel
             value="ontario"
