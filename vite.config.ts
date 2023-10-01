@@ -2,14 +2,13 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import viteTsConfigPaths from "vite-tsconfig-paths";
-import basicSsl from "@vitejs/plugin-basic-ssl";
 export default defineConfig({
   cacheDir: "./node_modules/.vite/app",
 
   server: {
     port: 4200,
     host: "0.0.0.0",
-    open: true,
+    open: true
   },
 
   preview: {
@@ -18,7 +17,6 @@ export default defineConfig({
   },
 
   plugins: [
-    basicSsl(),
     react(),
     viteTsConfigPaths({
       root: "./",

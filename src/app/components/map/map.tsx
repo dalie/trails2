@@ -2,14 +2,12 @@ import { useEffect, useState } from "react";
 import ReactMap, { Layer, Source } from "react-map-gl";
 import styles from "./map.module.scss";
 import { Expression } from "mapbox-gl";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { tilesetsState } from "src/app/store/tilesets.atom";
-import { BaseLayer } from "src/app/store/base-layer.atom";
+import { baseLayerState } from "src/app/store/base-layer.atom";
+import { trackLayersState } from "src/app/store/track-layers.atom";
 
-/* eslint-disable-next-line */
-export interface MapProps {
-  baseLayer: BaseLayer;
-}
+
 
 function getLineColor(layerId: string): string | Expression {
   if (layerId.startsWith("oftr")) {
@@ -27,8 +25,10 @@ function getLineColor(layerId: string): string | Expression {
   }
 }
 
-export function Map({ baseLayer }: MapProps) {
+export function Map() {
+  const baseLayer = useRecoilValue(baseLayerState);
   const [tileSetsMetadata, setTileSetsMetadata] = useRecoilState(tilesetsState);
+  const trackLayers = useRecoilValue(trackLayersState);
 
   useEffect(() => {
     fetch(
@@ -54,7 +54,7 @@ export function Map({ baseLayer }: MapProps) {
               .then((response) => response.json())
               .then((data) => {
                 setTileSetsMetadata((oldValue) => {
-                  return [...oldValue, data];
+                  return [...oldValue.filter(v=>v.id!== data.id), data];
                 });
               });
           });
@@ -137,7 +137,7 @@ export function Map({ baseLayer }: MapProps) {
             />
           )}
         </Source>
-        {tileSetsMetadata.map((tileSet, index) => (
+        {tileSetsMetadata.filter(v=>trackLayers.includes(v.id)).map((tileSet, index) => (
           <Source
             key={index}
             id={`tileset-source-${index}`}
