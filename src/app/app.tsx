@@ -2,10 +2,12 @@
 import { useCallback, useState } from "react";
 import styles from "./app.module.scss";
 import { MapControls } from "./components/map-controls/map-controls";
-import { BaseLayer, Map } from "./components/map/map";
+import { Map } from "./components/map/map";
+import { useRecoilState } from "recoil";
+import { BaseLayer, baseLayerState } from "./store/base-layer.atom";
 
 export function App() {
-  const [baseLayer, setBaseLayer] = useState<BaseLayer>("quebec");
+  const [baseLayer, setBaseLayer] = useRecoilState(baseLayerState);
 
   const baseLayerChanged = useCallback((value: BaseLayer) => {
     setBaseLayer(value);

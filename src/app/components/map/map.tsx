@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import ReactMap, { Layer, Source } from "react-map-gl";
 import styles from "./map.module.scss";
 import { Expression } from "mapbox-gl";
-
-export type BaseLayer = "quebec" | "ontario" | "satellite" | "streets";
+import { useRecoilState } from "recoil";
+import { tilesetsState } from "src/app/store/tilesets.atom";
+import { BaseLayer } from "src/app/store/base-layer.atom";
 
 /* eslint-disable-next-line */
 export interface MapProps {
@@ -25,10 +26,9 @@ function getLineColor(layerId: string): string | Expression {
     return "#9933aa";
   }
 }
+
 export function Map({ baseLayer }: MapProps) {
-  const [tileSetsMetadata, setTileSetsMetadata] = useState<
-    { id: string; name: string; vector_layers: { id: string }[] }[]
-  >([]);
+  const [tileSetsMetadata, setTileSetsMetadata] = useRecoilState(tilesetsState);
 
   useEffect(() => {
     fetch(
@@ -45,20 +45,19 @@ export function Map({ baseLayer }: MapProps) {
           )
           .map((layer: any) => layer.id);
 
-        tilesets.forEach((tileset) => {
-          // fetch TileJSON metadata for each tileset
-          fetch(
-            `https://api.mapbox.com/v4/${tileset}.json?access_token=pk.eyJ1IjoiZG9taW5pY2FsaWUiLCJhIjoiY2tuZzJ0YWtvMDcwejJxczlwa2NtbW0zeSJ9.ire3NMM19l7z4Zeqa20RVw`
-          )
-            .then((response) => response.json())
-            .then((data) => {
-              console.log(data);
-
-              setTileSetsMetadata((oldValue) => {
-                return [...oldValue, data];
+        tilesets
+          .filter((t) => !tileSetsMetadata.map((tm) => tm.id).includes(t))
+          .forEach((tileset) => {
+            fetch(
+              `https://api.mapbox.com/v4/${tileset}.json?access_token=pk.eyJ1IjoiZG9taW5pY2FsaWUiLCJhIjoiY2tuZzJ0YWtvMDcwejJxczlwa2NtbW0zeSJ9.ire3NMM19l7z4Zeqa20RVw`
+            )
+              .then((response) => response.json())
+              .then((data) => {
+                setTileSetsMetadata((oldValue) => {
+                  return [...oldValue, data];
+                });
               });
-            });
-        });
+          });
       });
   }, []);
 
@@ -79,6 +78,26 @@ export function Map({ baseLayer }: MapProps) {
         }
       >
         <Source
+          id="label-source"
+          type="vector"
+          url="mapbox://mapbox.mapbox-streets-v8,mapbox.mapbox-terrain-v2"
+        >
+          <Layer
+            id="label-layer"
+            type="symbol"
+            source="label-source"
+            source-layer="place_label"
+            paint={{
+              "text-opacity": 0,
+            }}
+            layout={{
+              "text-field": ["get", "name_en"],
+              "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
+              "text-size": 12,
+            }}
+          />
+        </Source>
+        <Source
           id="ontario-sat-source"
           type="raster"
           tileSize={256}
@@ -88,6 +107,7 @@ export function Map({ baseLayer }: MapProps) {
         >
           {baseLayer === "ontario" && (
             <Layer
+              beforeId="label-layer"
               id="ontario-sat"
               type="raster"
               source="ontario-sat-source"
@@ -107,6 +127,7 @@ export function Map({ baseLayer }: MapProps) {
         >
           {baseLayer === "quebec" && (
             <Layer
+              beforeId="label-layer"
               id="quebec-sat"
               type="raster"
               source="quebec-sat-source"
@@ -116,7 +137,6 @@ export function Map({ baseLayer }: MapProps) {
             />
           )}
         </Source>
-
         {tileSetsMetadata.map((tileSet, index) => (
           <Source
             key={index}
@@ -126,6 +146,7 @@ export function Map({ baseLayer }: MapProps) {
           >
             {tileSet.vector_layers.map((layer) => (
               <Layer
+                key={layer.id}
                 id={`tileset-layer-${index}`}
                 type="line"
                 source={`tileset-source-${index}`}

@@ -7,7 +7,7 @@ import {
 } from "@mui/material";
 import styles from "./map-controls.module.scss";
 import { useCallback } from "react";
-import { BaseLayer } from "../map/map";
+import { BaseLayer } from "src/app/store/base-layer.atom";
 
 /* eslint-disable-next-line */
 export interface MapControlsProps {
