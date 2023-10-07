@@ -3,9 +3,10 @@ import ReactMap, { Layer, Source } from "react-map-gl";
 import styles from "./map.module.scss";
 import { Expression } from "mapbox-gl";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { tilesetsState } from "src/app/store/tilesets.atom";
-import { baseLayerState } from "src/app/store/base-layer.atom";
-import { trackLayersState } from "src/app/store/track-layers.atom";
+import { baseLayerState } from "../../store/base-layer.atom";
+import { tilesetsState } from "../../store/tilesets.atom";
+import { trackLayersState } from "../../store/track-layers.atom";
+
 
 
 

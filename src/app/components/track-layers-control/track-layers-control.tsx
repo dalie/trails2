@@ -1,11 +1,11 @@
 import { useState } from "react";
 import styles from "./track-layers-control.module.scss";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { trackLayersState } from "src/app/store/track-layers.atom";
+import { trackLayersState } from "../../store/track-layers.atom";
 import { Fab, Menu, MenuItem, MenuList, Tooltip } from "@mui/material";
 import TrackIcon from '@mui/icons-material/Timeline';
 import CheckIcon from '@mui/icons-material/Check';
-import { tilesetsState } from "src/app/store/tilesets.atom";
+import { tilesetsState } from "../../store/tilesets.atom";
 
 export function TrackLayersControl() {
   const tilesets = useRecoilValue(tilesetsState);

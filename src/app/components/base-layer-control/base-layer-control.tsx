@@ -2,7 +2,7 @@ import { Fab,  Menu, MenuItem, Tooltip } from "@mui/material";
 import styles from "./base-layer-control.module.scss";
 import {  useState } from "react";
 import { useRecoilState } from "recoil";
-import { BaseLayer, baseLayerState } from "src/app/store/base-layer.atom";
+import { BaseLayer, baseLayerState } from "../../store/base-layer.atom";
 import LayersIcon from '@mui/icons-material/Layers';
 
 export function BaseLayerControl() {
