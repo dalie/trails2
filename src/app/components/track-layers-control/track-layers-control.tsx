@@ -69,7 +69,7 @@ export function TrackLayersControl() {
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
       >
         {tilesets.map((tileset)=>(
-          <MenuItem onClick={()=>handleMenuItemClick(tileset.id)}>
+          <MenuItem key={tileset.id} onClick={()=>handleMenuItemClick(tileset.id)}>
           {trackLayers.includes(tileset.id) && <CheckIcon/>}
           {tileset.name}
           

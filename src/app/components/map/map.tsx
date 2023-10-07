@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import ReactMap, { Layer, Source } from "react-map-gl";
 import styles from "./map.module.scss";
 import { Expression } from "mapbox-gl";
@@ -154,16 +154,7 @@ export function Map() {
                 paint={{
                   //Purple line color
                   "line-color": getLineColor(tileSet.name),
-                  "line-opacity": [
-                    "interpolate",
-                    ["linear"],
-                    ["zoom"],
-                    /* Zoom levels and corresponding opacity values */
-                    10,
-                    1, // Lower zoom level and full opacity
-                    20,
-                    0, // Higher zoom level and lower opacity
-                  ],
+                  "line-opacity": 1,
                   "line-width": [
                     "interpolate",
                     ["linear"],
